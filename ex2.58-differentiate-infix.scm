@@ -1,3 +1,4 @@
+
 (define (deriv exp var)
   (display "deriv : ")
   (write-line exp)
@@ -17,6 +18,7 @@
 			 (multiplicand exp))))
 	(else
 	  (error "unknown expression type -- DERIV" exp))))
+
 
 
 (define (variable? x) (symbol? x))
@@ -44,18 +46,27 @@
 	((and (number? m1) (number? m2)) (* m1 m2))
 	(else (list m1 '* m2))))
 
-(deriv '(x + (3 * (x + (y + 2))))  'x)
+; (deriv '(x + (3 * (x + (y + 2))))  'x)
 
 
 ; b:
 
+(define (split-with the-list spliter)
+  (define (iter 1st-half remaining-list)
+    (cond ((not (pair? remaining-list)) (cons 1st-half '()))
+	  ((eq? spliter (car remaining-list)) (cons 1st-half (cdr remaining-list)))
+	  (else (iter (append 1st-half (list (car remaining-list))) (cdr remaining-list)))))
+  (iter '() the-list))
+
 (define (sum? x) 
   (and (pair? x)
-       (> 0 (length (filter (lambda (el) (eq? el '+)) x)))))
-(define addend car)
+       (> (length (filter (lambda (el) (eq? el '+)) x)) 0)))
+(define (addend x)
+  (let ((raw (car (split-with x '+))))
+    (if (= 1 (length raw)) (car raw) raw)))
 (define (augend x)
-  (let ((raw-augend (cddr x)))
-    (if (= 1 (length raw-augend)) (car raw-augend) raw-augend)))
+  (let ((raw (cdr (split-with x '+))))
+    (if (= 1 (length raw)) (car raw) raw)))
 
 (define (product? x) 
   (and (pair? x)
@@ -65,8 +76,7 @@
   (let ((raw (cddr x)))
     (if (= 1 (length raw)) (car raw) raw)))
 
-(deriv '(x + 3 * (x + y + 2))  'x)
-
+; (deriv '(x + 3 * (x + y + 2))  'x)
 (deriv '(x * 3 + (x + y + 2))  'x)
 
 

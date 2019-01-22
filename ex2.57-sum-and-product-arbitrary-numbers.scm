@@ -35,6 +35,9 @@
   (if (= (length (cddr s)) 1)
     (caddr s)
     (cons '+ (cddr s))))
+; this is also cool:
+; (define (augend s) (accumulate make-sum 0 (cddr s)))
+
 (define (make-sum a1 a2)
   (cond ((=number? a1 0) a2)
 	((=number? a2 0) a1)

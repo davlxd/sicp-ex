@@ -1,3 +1,4 @@
+
 (define (deriv exp var)
   (cond ((number? exp) 0)
 	((variable? exp)
@@ -17,7 +18,7 @@
 	 (write-line "deconstruct exponentiation")
 	 (make-product
 	   (make-product (exponent exp)
-			 (make-exponentiation (base exp) (- (exponent exp) 1)))
+			 (make-exponentiation (base exp) (- (exponent exp) 1))) ;; this is wrong!!! since (exponent exp) not necessarily to be a number, should reuse make-sum!
 	   (deriv (base exp) var)))
 	(else
 	  (error "unknown expression type -- DERIV" exp))))
@@ -41,7 +42,7 @@
 
 (define (make-exponentiation base exponent)
   (cond ((=number? exponent 0) 1)
-	((=number? exponent 1) base)
+	((=number? exponent 1) base)  ;; ((=number? base 1) 1) 
 	(else (list '** base exponent))))
 
 (define (exponentiation? x) (and (pair? x) (eq? (car x) '**)))
@@ -58,3 +59,4 @@
 
 (deriv '(* (*x x 4) (+ x 3)) 'x)
 (deriv '(** x 4) 'x)
+
