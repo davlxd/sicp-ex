@@ -1,7 +1,7 @@
 (define (element-of-set? x set)
   (cond ((null? set) false)
-	((equal? x (car set)) true)
-	(else (element-of-set? x (cdr set)))))
+        ((equal? x (car set)) true)
+        (else (element-of-set? x (cdr set)))))
 ; doesn't change too much, sligntly worse
 
 
@@ -15,10 +15,10 @@
 
 (define (intersection-set set1 set2)
   (cond ((or (null? set1) (null? set2)) '())
-	((element-of-set? (car set1) set2)        
-	 (cons (car set1)
-	       (intersection-set (cdr set1) set2)))
-	(else (intersection-set (cdr set1) set2))))
+        ((element-of-set? (car set1) set2)
+         (cons (car set1)
+               (intersection-set (cdr set1) set2)))
+        (else (intersection-set (cdr set1) set2))))
 ; doesn't change too much, slightly worse
 
 
