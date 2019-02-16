@@ -22,3 +22,6 @@
 ;
 
 
+; Correctin:
+; Again it's T(n) = 2*T(n/2) + O(1)
+

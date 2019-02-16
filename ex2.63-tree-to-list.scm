@@ -6,5 +6,18 @@
 ;    so apparently tree->list-2 grows slower
 ;
 ;
-
+;
+;
+; Correction:
+; For tree->list-1: 
+; T(n) = 2*T(n/2) + O(n/2) (as the procedure append takes linear time)
+; Solving above equation, we get T(n) = O(n * log n)
+;                         4(O(2))                   sum: O(2)
+;           2(O(1))                2(O(1))          sum: O(2)
+;        1(O(0))    1(O(0))   1(O(0))    1(O(0))    sum: O(2)
+;                                                   total: O(n/2 * lgn)
+; 
+; For tree->list-2:
+; T(n) = 2*T(n/2) + O(1)
+; Solving the above equation, we get T(n) = O(n)
 
