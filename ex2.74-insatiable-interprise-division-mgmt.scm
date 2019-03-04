@@ -52,4 +52,35 @@
   ((get 'get-salary (division-name-tag record)) (record-contents record)))
 
 
+; c. Let's ask get-record return nil if record not found
+(define (compose f g) (lambda (x) (f (g x))))
+
+(define (find-employee-record name file-list)
+  (filter (compose not nil?)
+	  (map (lambda (file) (get-record name file))
+	       file-list)))
+
+
+; Not-quite correction: The following use recursion find the first
+(define (find-employee-record employee-name division-list) 
+  (if (null? division-list) 
+    #f 
+    (or (get-record (car division-list) employee-name) 
+	(find-employee-record employee-name (cdr division-list))))) 
+
+
+
+; d. well this newly acquired compamy must have divsion files,
+;    and from coding point of view, the following code needs to write and executed
+
+
+(define (install-new-department)
+  (define (get-record-new name file-content) (attach-tag 'new 'some-record))
+
+  (define (get-salary-new record-contents) 'salary)
+
+  (put 'get-record 'new get-record-dev)
+  (put 'get-salary 'new get-salary-dev)
+  'done)
+
 
