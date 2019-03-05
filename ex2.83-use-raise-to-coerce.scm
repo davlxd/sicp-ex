@@ -19,3 +19,4 @@
 (put 'raise 'scheme-number (lambda (value) (make-rational value 1)))
 (put 'raise 'rational (lambda (value) (make-real (/ (numer value) (denom value)))))
 (put 'raise 'real (lambda (value) (make-complex-from-real-imag value 0)))
+
