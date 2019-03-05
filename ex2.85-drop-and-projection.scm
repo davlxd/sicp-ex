@@ -8,7 +8,9 @@
   (define (project-complex-down-to-real complex)
     (make-real (real-part complex)))
   (define (project-real-down-to-rational real)
-    (make-rational (make-rational (round real) 1)))
+    (make-rational (round real) 1)) ;; This is incorrect, how do you convert 1.5 to 3/2?
+  ; just an idea:
+    (make-rational (round (* real 1000000000)) 1000000000)
   (define (project-rational-down-to-integer rational)
     (make-scheme-number (numer rational)))
 

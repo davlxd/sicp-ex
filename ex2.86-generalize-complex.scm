@@ -7,10 +7,10 @@
 (define (mul x y) (apply-generic 'mul x y))
 (define (div x y) (apply-generic 'div x y))
 (define (square x) (apply-generic 'mul x x)) ;;<-
-(define (sqrt1 x) (apply-generic 'sqrt1 x)) ;;<- TODO
-(define (atan1 x y) (apply-generic 'atan1 x y)) ;;<- TODO
-(define (cos1 x) (apply-generic 'cos1 x)) ;;<- TODO
-(define (sin1 x) (apply-generic 'sin1 x)) ;;<- TODO
+(define (sqrt1 x) (apply-generic 'sqrt1 x)) ;;<-
+(define (atan1 x y) (apply-generic 'atan1 x y)) ;;<-
+(define (cos1 x) (apply-generic 'cos1 x)) ;;<-
+(define (sin1 x) (apply-generic 'sin1 x)) ;;<-
 
 
 ;;->
@@ -41,6 +41,8 @@
   (put 'sin1 '(real) sin)
   'done)
 ;;<-
+
+;; Correction: forgot to tag them all above!!!
 
 
 
