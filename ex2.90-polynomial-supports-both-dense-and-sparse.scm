@@ -359,8 +359,8 @@
   (put '=zero? '(polynomial) ;;<-
        (lambda (p) (poly-=zero? (term-list p))))
   'done)
-(install-polynomial-package)
 (define (make-poly var terms) ((get 'make 'polynomial) var terms))
+(install-polynomial-package)
 
 
 
