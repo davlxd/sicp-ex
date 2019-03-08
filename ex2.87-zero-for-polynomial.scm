@@ -263,7 +263,7 @@
 
 
   (define (poly-=zero? terms) ;;<-
-    (cond ((null? terms) #t)
+    (cond ((null? terms) #t)  ;; Correction: should use empty-termlist?
 	  ((=zero? (coeff (first-term terms))) (poly-=zero? (rest-terms terms)))
 	  (else #f)))
 
