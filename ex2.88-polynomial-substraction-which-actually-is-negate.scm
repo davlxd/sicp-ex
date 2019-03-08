@@ -247,11 +247,11 @@
   ;;<-
   (define (negate-poly p)
     (make-poly (variable p)
-	       (negate-terms (term-list p))))
+	       (negate-term (term-list p))))
 
-  (define (negate-terms L)
+  (define (negate-term L)
     (if (not (empty-termlist? L))
-      (adjoin-term  (make-term (order (first-term L)) (negate (coeff (first-term L)))) (negate-terms (rest-terms L)))
+      (adjoin-term  (make-term (order (first-term L)) (negate (coeff (first-term L)))) (negate-term (rest-terms L)))
       L))
   ;;<-
 
@@ -305,6 +305,8 @@
 
 (install-polynomial-package)
 
+
+;; export/duplicat term operations for testing purpose
 (define (adjoin-term term term-list)
   (if (=zero? (coeff term))
     term-list
@@ -316,8 +318,6 @@
 (define (make-term order coeff) (list order coeff))
 (define (order term) (car term))
 (define (coeff term) (cadr term))
-
-
 
 
 
