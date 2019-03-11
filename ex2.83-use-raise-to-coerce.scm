@@ -4,11 +4,11 @@
 
 (define (raise datum)
   (let ((type (type-tag datum))
-	(value (contents datum)))
+        (value (contents datum)))
     (cond ((eq? type 'scheme-number) (make-rational value 1))
-	  ((eq? type 'rational) (make-real (/ (numer value) (denom value))))
-	  ((eq? type 'real) (make-complex-from-real-imag value 0))
-	  ((eq? type 'complex) datum))))
+          ((eq? type 'rational) (make-real (/ (numer value) (denom value))))
+          ((eq? type 'real) (make-complex-from-real-imag value 0))
+          ((eq? type 'complex) datum))))
 
 ;
 ; Correction:

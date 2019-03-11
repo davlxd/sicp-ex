@@ -2,10 +2,10 @@
   (let ((type-tags (map type-tag args)))
     (let ((proc (get op type-tags)))
       (if proc
-	(apply proc (map contents args))
-	(error
-	  "No method for these types -- APPLY-GENERIC"
-	  (list op type-tags))))))
+        (apply proc (map contents args))
+        (error
+          "No method for these types -- APPLY-GENERIC"
+          (list op type-tags))))))
 
 (define (equ? x y) (apply-generic 'equ? x y))
 

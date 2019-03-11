@@ -23,9 +23,9 @@
 (define (install-atan1)
   (put 'atan1 '(scheme-number scheme-number) atan)
   (put 'atan1 '(rational rational) (lambda (y x)
-				     (let ((real-y (/ (numer y) (denom y)))
-					   (real-x (/ (numer x) (denom x))))
-				       (atan real-y real-x))))
+                                     (let ((real-y (/ (numer y) (denom y)))
+                                           (real-x (/ (numer x) (denom x))))
+                                       (atan real-y real-x))))
   (put 'atan1 '(real real) atan)
   'done)
 
@@ -53,7 +53,7 @@
   (define (make-from-real-imag x y) (cons x y))
   (define (magnitude z)
     (sqrt1 (add (square (real-part z)) ;;<-
-	       (square (imag-part z)))))
+                (square (imag-part z)))))
   (define (angle z)
     (atan1 (imag-part z) (real-part z))) ;;<-
   (define (make-from-mag-ang r a) 
@@ -83,7 +83,7 @@
     (mul (magnitude z) (sin1 (angle z)))) ;;<-
   (define (make-from-real-imag x y) 
     (cons (sqrt1 (add (square x) (square y))) ;;<-
-	  (atan1 y x))) ;;<-
+          (atan1 y x))) ;;<-
   ;; interface to the rest of the system
   (define (tag x) (attach-tag 'polar x))
   (put 'real-part '(polar) real-part)
@@ -107,16 +107,16 @@
   ;; internal procedures
   (define (add-complex z1 z2)
     (make-from-real-imag (add (real-part z1) (real-part z2))  ;;<-
-			 (add (imag-part z1) (imag-part z2))))  ;;<-
+                         (add (imag-part z1) (imag-part z2))))  ;;<-
   (define (sub-complex z1 z2)
     (make-from-real-imag (sub (real-part z1) (real-part z2)) ;;<-
-			 (sub (imag-part z1) (imag-part z2))))  ;;<-
+                         (sub (imag-part z1) (imag-part z2))))  ;;<-
   (define (mul-complex z1 z2)
     (make-from-mag-ang (mul (magnitude z1) (magnitude z2))  ;;<-
-		       (add (angle z1) (angle z2))))  ;;<-
+                       (add (angle z1) (angle z2))))  ;;<-
   (define (div-complex z1 z2)
     (make-from-mag-ang (div (magnitude z1) (magnitude z2))  ;;<-
-		       (sub (angle z1) (angle z2))))  ;;<-
+                       (sub (angle z1) (angle z2))))  ;;<-
   ;; interface to rest of the system
   (define (tag z) (attach-tag 'complex z))
   (put 'add '(complex complex)

@@ -10,7 +10,7 @@
   (define (project-real-down-to-rational real)
     (make-rational (round real) 1)) ;; This is incorrect, how do you convert 1.5 to 3/2?
   ; just an idea:
-    (make-rational (round (* real 1000000000)) 1000000000)
+  (make-rational (round (* real 1000000000)) 1000000000)
   (define (project-rational-down-to-integer rational)
     (make-scheme-number (numer rational)))
 
@@ -44,11 +44,11 @@
   (let ((type-tag (type-tag datum)))
     (let ((proc (get 'project type-tag)))
       (if proc
-	(let ((dropped-datum (proc datum)))
-	  (if (equ? datum (raise dropped-datum)) ;; let's assume raise doesn't give us 404
-	    (drop dropped-datum)
-	    datum))
-	datum))))
+        (let ((dropped-datum (proc datum)))
+          (if (equ? datum (raise dropped-datum)) ;; let's assume raise doesn't give us 404
+            (drop dropped-datum)
+            datum))
+        datum))))
 
 
 ; ex2.84
@@ -56,23 +56,23 @@
   (let ((type-tags (map type-tag args)))
     (let ((proc (get op type-tags)))
       (if proc
-	(drop (apply proc (map contents args))) ;; drop at here
-	(if (= (length args) 2)
-	  (let ((type1 (car type-tags))
-		(type2 (cadr type-tags))
-		(a1 (car args))
-		(a2 (cadr args)))
-	    (if (not (eq? type1 type2))
+        (drop (apply proc (map contents args))) ;; drop at here
+        (if (= (length args) 2)
+          (let ((type1 (car type-tags))
+                (type2 (cadr type-tags))
+                (a1 (car args))
+                (a2 (cadr args)))
+            (if (not (eq? type1 type2))
 
-	      ;;
-	      (if (> (compare-types type1 type2) 0)
-		(apply-generic op a1 (successive-raise a2 type1))
-		(apply-generic op (successive-raise a1 type2) a2))
-	      ;;
+              ;;
+              (if (> (compare-types type1 type2) 0)
+                (apply-generic op a1 (successive-raise a2 type1))
+                (apply-generic op (successive-raise a1 type2) a2))
+              ;;
 
-	      (error "The 2 params have same type with no method" type1)))
-	  (error "No method for these types"
-		 (list op type-tags)))))))
+              (error "The 2 params have same type with no method" type1)))
+          (error "No method for these types"
+                 (list op type-tags)))))))
 
 
 

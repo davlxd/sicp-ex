@@ -51,18 +51,18 @@
       (cons (/ n g) (/ d g))))
   (define (add-rat x y)
     (make-rat (+ (* (numer x) (denom y))
-		 (* (numer y) (denom x)))
-	      (* (denom x) (denom y))))
+                 (* (numer y) (denom x)))
+              (* (denom x) (denom y))))
   (define (sub-rat x y)
     (make-rat (- (* (numer x) (denom y))
-		 (* (numer y) (denom x)))
-	      (* (denom x) (denom y))))
+                 (* (numer y) (denom x)))
+              (* (denom x) (denom y))))
   (define (mul-rat x y)
     (make-rat (* (numer x) (numer y))
-	      (* (denom x) (denom y))))
+              (* (denom x) (denom y))))
   (define (div-rat x y)
     (make-rat (* (numer x) (denom y))
-	      (* (denom x) (numer y))))
+              (* (denom x) (numer y))))
   ;; interface to rest of the system
   (define (tag x) (attach-tag 'rational x))
   (put 'add '(rational rational)
@@ -91,7 +91,7 @@
   (define (make-from-real-imag x y) (cons x y))
   (define (magnitude z)
     (sqrt (+ (square (real-part z))
-	     (square (imag-part z)))))
+             (square (imag-part z)))))
   (define (angle z)
     (atan (imag-part z) (real-part z)))
   (define (make-from-mag-ang r a) 
@@ -120,7 +120,7 @@
     (* (magnitude z) (sin (angle z))))
   (define (make-from-real-imag x y) 
     (cons (sqrt (+ (square x) (square y)))
-	  (atan y x)))
+          (atan y x)))
   ;; interface to the rest of the system
   (define (tag x) (attach-tag 'polar x))
   (put 'real-part '(polar) real-part)
@@ -147,16 +147,16 @@
   ;; internal procedures
   (define (add-complex z1 z2)
     (make-from-real-imag (+ (real-part z1) (real-part z2))
-			 (+ (imag-part z1) (imag-part z2))))
+                         (+ (imag-part z1) (imag-part z2))))
   (define (sub-complex z1 z2)
     (make-from-real-imag (- (real-part z1) (real-part z2))
-			 (- (imag-part z1) (imag-part z2))))
+                         (- (imag-part z1) (imag-part z2))))
   (define (mul-complex z1 z2)
     (make-from-mag-ang (* (magnitude z1) (magnitude z2))
-		       (+ (angle z1) (angle z2))))
+                       (+ (angle z1) (angle z2))))
   (define (div-complex z1 z2)
     (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
-		       (- (angle z1) (angle z2))))
+                       (- (angle z1) (angle z2))))
   ;; interface to rest of the system
   (define (tag z) (attach-tag 'complex z))
   (put 'add '(complex complex)
@@ -183,10 +183,10 @@
   (let ((type-tags (map type-tag args)))
     (let ((proc (get op type-tags)))
       (if proc
-	(apply proc (map contents args))
-	(error
-	  "No method for these types -- APPLY-GENERIC"
-	  (list op type-tags))))))
+        (apply proc (map contents args))
+        (error
+          "No method for these types -- APPLY-GENERIC"
+          (list op type-tags))))))
 
 (define (=zero? x) (apply-generic '=zero? x))
 

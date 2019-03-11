@@ -59,18 +59,18 @@
       (cons (/ n g) (/ d g))))
   (define (add-rat x y)
     (make-rat (+ (* (numer x) (denom y))
-		 (* (numer y) (denom x)))
-	      (* (denom x) (denom y))))
+                 (* (numer y) (denom x)))
+              (* (denom x) (denom y))))
   (define (sub-rat x y)
     (make-rat (- (* (numer x) (denom y))
-		 (* (numer y) (denom x)))
-	      (* (denom x) (denom y))))
+                 (* (numer y) (denom x)))
+              (* (denom x) (denom y))))
   (define (mul-rat x y)
     (make-rat (* (numer x) (numer y))
-	      (* (denom x) (denom y))))
+              (* (denom x) (denom y))))
   (define (div-rat x y)
     (make-rat (* (numer x) (denom y))
-	      (* (denom x) (numer y))))
+              (* (denom x) (numer y))))
   ;; interface to rest of the system
   (define (tag x) (attach-tag 'rational x))
   (put 'add '(rational rational)
@@ -99,7 +99,7 @@
   (define (make-from-real-imag x y) (cons x y))
   (define (magnitude z)
     (sqrt (+ (square (real-part z))
-	     (square (imag-part z)))))
+             (square (imag-part z)))))
   (define (angle z)
     (atan (imag-part z) (real-part z)))
   (define (make-from-mag-ang r a) 
@@ -128,7 +128,7 @@
     (* (magnitude z) (sin (angle z))))
   (define (make-from-real-imag x y) 
     (cons (sqrt (+ (square x) (square y)))
-	  (atan y x)))
+          (atan y x)))
   ;; interface to the rest of the system
   (define (tag x) (attach-tag 'polar x))
   (put 'real-part '(polar) real-part)
@@ -155,16 +155,16 @@
   ;; internal procedures
   (define (add-complex z1 z2)
     (make-from-real-imag (+ (real-part z1) (real-part z2))
-			 (+ (imag-part z1) (imag-part z2))))
+                         (+ (imag-part z1) (imag-part z2))))
   (define (sub-complex z1 z2)
     (make-from-real-imag (- (real-part z1) (real-part z2))
-			 (- (imag-part z1) (imag-part z2))))
+                         (- (imag-part z1) (imag-part z2))))
   (define (mul-complex z1 z2)
     (make-from-mag-ang (* (magnitude z1) (magnitude z2))
-		       (+ (angle z1) (angle z2))))
+                       (+ (angle z1) (angle z2))))
   (define (div-complex z1 z2)
     (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
-		       (- (angle z1) (angle z2))))
+                       (- (angle z1) (angle z2))))
   ;; interface to rest of the system
   (define (tag z) (attach-tag 'complex z))
   (put 'add '(complex complex)
@@ -191,10 +191,10 @@
   (let ((type-tags (map type-tag args)))
     (let ((proc (get op type-tags)))
       (if proc
-	(apply proc (map contents args))
-	(error
-	  "No method for these types -- APPLY-GENERIC"
-	  (list op type-tags))))))
+        (apply proc (map contents args))
+        (error
+          "No method for these types -- APPLY-GENERIC"
+          (list op type-tags))))))
 
 (define (=zero? x) (apply-generic '=zero? x))
 
@@ -219,39 +219,39 @@
   (define (add-poly p1 p2)
     (if (same-variable? (variable p1) (variable p2))
       (make-poly (variable p1)
-		 (add-terms (term-list p1) (term-list p2)))
+                 (add-terms (term-list p1) (term-list p2)))
       (error "Polys not in same var -- ADD-POLY" (list p1 p2))))
   (define (mul-poly p1 p2)
     (if (same-variable? (variable p1) (variable p2))
       (make-poly (variable p1)
-		 (mul-terms (term-list p1) (term-list p2)))
+                 (mul-terms (term-list p1) (term-list p2)))
       (error "Polys not in same var -- MUL-POLY" (list p1 p2))))
 
   (define (div-poly p1 p2)
     (if (same-variable? (variable p1) (variable p2))
       (make-poly (variable p1)
-		 (div-terms (term-list p1) (term-list p2)))
+                 (div-terms (term-list p1) (term-list p2)))
       (error "Polys not in same var -- DIV-POLY" (list p1 p2))))
 
   (define (add-terms L1 L2)
     (cond ((empty-termlist? L1) L2)
-	  ((empty-termlist? L2) L1)
-	  (else
-	    (let ((t1 (first-term L1)) (t2 (first-term L2)))
-	      (cond ((> (order t1) (order t2))
-		     (adjoin-term
-		       t1 (add-terms (rest-terms L1) L2)))
-		    ((< (order t1) (order t2))
-		     (adjoin-term
-		       t2 (add-terms L1 (rest-terms L2))))
-		    (else
-		      (adjoin-term
-			(make-term (order t1)
-				   (add (coeff t1) (coeff t2)))
-			(add-terms (rest-terms L1) (rest-terms L2)))))))))
+          ((empty-termlist? L2) L1)
+          (else
+            (let ((t1 (first-term L1)) (t2 (first-term L2)))
+              (cond ((> (order t1) (order t2))
+                     (adjoin-term
+                       t1 (add-terms (rest-terms L1) L2)))
+                    ((< (order t1) (order t2))
+                     (adjoin-term
+                       t2 (add-terms L1 (rest-terms L2))))
+                    (else
+                      (adjoin-term
+                        (make-term (order t1)
+                                   (add (coeff t1) (coeff t2)))
+                        (add-terms (rest-terms L1) (rest-terms L2)))))))))
   (define (negate-poly p)
     (make-poly (variable p)
-	       (negate-term (term-list p))))
+               (negate-term (term-list p))))
 
   (define (negate-term L)
     (if (not (empty-termlist? L))
@@ -262,36 +262,36 @@
     (if (empty-termlist? L1)
       (the-empty-termlist)
       (add-terms (mul-term-by-all-terms (first-term L1) L2)
-		 (mul-terms (rest-terms L1) L2))))
+                 (mul-terms (rest-terms L1) L2))))
 
   (define (mul-term-by-all-terms t1 L)
     (if (empty-termlist? L)
       (the-empty-termlist)
       (let ((t2 (first-term L)))
-	(adjoin-term
-	  (make-term (+ (order t1) (order t2))
-		     (mul (coeff t1) (coeff t2)))
-	  (mul-term-by-all-terms t1 (rest-terms L))))))
+        (adjoin-term
+          (make-term (+ (order t1) (order t2))
+                     (mul (coeff t1) (coeff t2)))
+          (mul-term-by-all-terms t1 (rest-terms L))))))
 
 
   (define (div-terms L1 L2)
     (if (empty-termlist? L1)
       (list (the-empty-termlist) (the-empty-termlist))
       (let ((t1 (first-term L1))
-	    (t2 (first-term L2)))
-	(if (> (order t2) (order t1))
-	  (list (the-empty-termlist) L1)
-	  (let ((new-c (div (coeff t1) (coeff t2)))
-		(new-o (- (order t1) (order t2))))
-	    (let ((rest-of-result
-		    (div-terms (sub-terms L1 
-					  (mul-terms L2 
-						     (adjoin-term (make-term new-o new-c)
-								  (the-empty-termlist)))) 
-			       L2))) 
-	      (list (adjoin-term (make-term new-o new-c) (car rest-of-result))
-		    (cadr rest-of-result))
-	      ))))))
+            (t2 (first-term L2)))
+        (if (> (order t2) (order t1))
+          (list (the-empty-termlist) L1)
+          (let ((new-c (div (coeff t1) (coeff t2)))
+                (new-o (- (order t1) (order t2))))
+            (let ((rest-of-result
+                    (div-terms (sub-terms L1 
+                                          (mul-terms L2 
+                                                     (adjoin-term (make-term new-o new-c)
+                                                                  (the-empty-termlist)))) 
+                               L2))) 
+              (list (adjoin-term (make-term new-o new-c) (car rest-of-result))
+                    (cadr rest-of-result))
+              ))))))
 
   (define (adjoin-term term term-list)
     (if (=zero? (coeff term))
@@ -309,8 +309,8 @@
 
   (define (poly-=zero? terms)
     (cond ((null? terms) #t)
-	  ((=zero? (coeff (first-term terms))) (poly-=zero? (rest-terms terms)))
-	  (else #f)))
+          ((=zero? (coeff (first-term terms))) (poly-=zero? (rest-terms terms)))
+          (else #f)))
 
   ;; interface to rest of the system
   (define (tag p) (attach-tag 'polynomial p))
@@ -352,16 +352,16 @@
 ; 3x^2 + 2x + 1
 (define poly1
   (make-poly 'x
-	     (adjoin-term (make-term 2 (make-scheme-number 3))
-			  (adjoin-term (make-term 1 (make-scheme-number 2))
-				       (adjoin-term (make-term 0 (make-scheme-number 1))
-						    (the-empty-termlist))))))
+             (adjoin-term (make-term 2 (make-scheme-number 3))
+                          (adjoin-term (make-term 1 (make-scheme-number 2))
+                                       (adjoin-term (make-term 0 (make-scheme-number 1))
+                                                    (the-empty-termlist))))))
 ; 6x - 4
 (define poly2
   (make-poly 'x
-	     (adjoin-term (make-term 1 (make-scheme-number 6))
-			  (adjoin-term (make-term 0 (make-scheme-number -4))
-				       (the-empty-termlist)))))
+             (adjoin-term (make-term 1 (make-scheme-number 6))
+                          (adjoin-term (make-term 0 (make-scheme-number -4))
+                                       (the-empty-termlist)))))
 
 poly1
 
@@ -371,9 +371,9 @@ poly1
 
 (add
   (make-poly 'y
-	     (adjoin-term (make-term 1 poly1) (the-empty-termlist)))
+             (adjoin-term (make-term 1 poly1) (the-empty-termlist)))
   (make-poly 'y
-	     (adjoin-term (make-term 1 poly2) (the-empty-termlist))))
+             (adjoin-term (make-term 1 poly2) (the-empty-termlist))))
 
 
 
@@ -407,22 +407,22 @@ poly1
 
 (define (expand poly)
   (append-map (lambda (term)
-		(let ((current-powered-var (powered-var (variable-of-poly poly) (order term)))
-		      (coeff-of-term (coeff term)))
-		  (if (eq? 'polynomial (type-tag coeff-of-term))
-		    (map (lambda (inner-multiply-list) (adjoin-multiply-list current-powered-var inner-multiply-list))
-			 (expand coeff-of-term))
-		    (list (multiply-list coeff-of-term current-powered-var)))))
-	      (term-list-of-poly poly)) )
+                (let ((current-powered-var (powered-var (variable-of-poly poly) (order term)))
+                      (coeff-of-term (coeff term)))
+                  (if (eq? 'polynomial (type-tag coeff-of-term))
+                    (map (lambda (inner-multiply-list) (adjoin-multiply-list current-powered-var inner-multiply-list))
+                         (expand coeff-of-term))
+                    (list (multiply-list coeff-of-term current-powered-var)))))
+              (term-list-of-poly poly)) )
 
 poly1 ; 3x^2 + 2x + 1
 (expand poly1)
 
 (define poly3 (add
-		(make-poly 'y
-			   (adjoin-term (make-term 2 poly1) (the-empty-termlist)))
-		(make-poly 'y
-			   (adjoin-term (make-term 2 poly2) (the-empty-termlist)))))
+                (make-poly 'y
+                           (adjoin-term (make-term 2 poly1) (the-empty-termlist)))
+                (make-poly 'y
+                           (adjoin-term (make-term 2 poly2) (the-empty-termlist)))))
 
 poly3 ; (3x^2 + 8x -3)y^2
 (term-list-of-poly poly3)

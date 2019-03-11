@@ -2,7 +2,7 @@
 (define (left-branch tree) (cadr tree))
 (define (right-branch tree) (caddr tree))
 (define (make-tree entry left right)
-    (list entry left right))
+  (list entry left right))
 
 (define (element-of-set? x set)
   (cond ((null? set) false)
@@ -83,5 +83,5 @@
                   (list->tree '(2 3 6 7 9 13)))
 
 (union-set (list->tree '(1 3 5 7 9 11))
-                  (list->tree '(2 3 6 7 9 13)))
+           (list->tree '(2 3 6 7 9 13)))
 

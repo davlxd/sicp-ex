@@ -5,15 +5,15 @@
 ;   
 
 (define (attach-tag type-tag contents)
-    (cons type-tag contents))
+  (cons type-tag contents))
 (define (type-tag datum)
-    (if (pair? datum)
-            (car datum)
-	          (error "Bad tagged datum -- TYPE-TAG" datum)))
+  (if (pair? datum)
+    (car datum)
+    (error "Bad tagged datum -- TYPE-TAG" datum)))
 (define (contents datum)
-    (if (pair? datum)
-            (cdr datum)
-	          (error "Bad tagged datum -- CONTENTS" datum)))
+  (if (pair? datum)
+    (cdr datum)
+    (error "Bad tagged datum -- CONTENTS" datum)))
 
 (define division-name-tag type-tag)
 (define file-contents contents)
@@ -57,8 +57,8 @@
 
 (define (find-employee-record name file-list)
   (filter (compose not nil?)
-	  (map (lambda (file) (get-record name file))
-	       file-list)))
+          (map (lambda (file) (get-record name file))
+               file-list)))
 
 
 ; Not-quite correction: The following use recursion find the first
@@ -66,7 +66,7 @@
   (if (null? division-list) 
     #f 
     (or (get-record (car division-list) employee-name) 
-	(find-employee-record employee-name (cdr division-list))))) 
+        (find-employee-record employee-name (cdr division-list))))) 
 
 
 
