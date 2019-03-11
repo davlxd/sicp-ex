@@ -478,13 +478,70 @@ poly6 ; [(3x^2 + 8x - 3)y^2 + 3y]z^2 + 4xz
 ;  (* (^ z 1) (scheme-number . 4) (^ x 1)))
 
 
-;;TODO expand a 3 level poly
-;;TODO (diminish ...)
+
+; Enhance data structure for expanded poly
+(define (powered-var var power) (list '^ var power))
+(define (is-powered-var? powered-var)
+  (and (pair? powered-var)
+       (eq? '^ (car powered-var))))
+(define (power-of powered-var) (caddr powered-var))
+(define (var-of powered-var) (cadr powered-var))
+(define (multiply-list . args) (cons '* args))
+(define (adjoin-multiply-list a l) (cons '* (cons a (cdr l))))
+
+(define (take-out-this-var-from-multiply-list var l)
+  (define (worker l)
+    (cond ((null? l) (cons 0 '()))
+          ((and (is-powered-var? (car l)) (eq? var (var-of (car l))))
+           (cons (power-of (car l)) (cdr l)))
+          (else (let ((rest (worker (cdr l))))
+                  (cons (car rest) (cons (car l) (cdr rest)))))))
+  (let ((work-result (worker (cdr l))))
+    (cons (car work-result) (cons '* (cdr work-result)))))
+
+(take-out-this-var-from-multiply-list 'y '((* (^ z 1) (scheme-number . 4)) (* (^ z 2) (^ y 2) (scheme-number . 8))))
 
 
+(define expanded-expression-of-semi-term coeff)
 
 
+(define (adjoin-semi-term-list the-order multiply-list semi-term-list)
+  (cond ((null? semi-term-list) (list (make-term the-order (list multiply-list))))
+        ((= the-order (order (car semi-term-list)))
+         (cons (make-term the-order (cons multiply-list (expanded-expression-of-semi-term (car semi-term-list))))
+               (cdr semi-term-list)))
+        (else (cons (car semi-term-list) (adjoin-semi-term-list the-order multiply-list (cdr semi-term-list))))))
 
 
+(define (diminish expanded-expression var-order)
+  (if (null? var-order)
+    expanded-expression ;; TODO normalize innermost coeff
+    (let ((current-var (car var-order)))
+      (let ((semi-term-list (fold (lambda (multiply-list semi-term-list)
+                                    (let ((taken-out (take-out-this-var-from-multiply-list current-var multiply-list)))
+                                      (adjoin-semi-term-list (car taken-out) (cdr taken-out) semi-term-list)))
+                                  '()
+                                  expanded-expression)))
+        (make-poly current-var (map (lambda (semi-term)
+                                      (make-term (car semi-term) (diminish (expanded-expression-of-semi-term semi-term) (cdr var-order))))
+                                    semi-term-list))))))
+
+
+(diminish
+  '((* (^ z 2) (^ y 2) (scheme-number . 3) (^ x 2))
+    (* (^ z 2) (^ y 2) (scheme-number . 8) (^ x 1))
+    (* (^ z 2) (^ y 2) (make-rational 3 2) (^ a 2) (^ b 4) (^ x 1))
+    (* (^ z 2) (^ y 2) (scheme-number . 9) (^ x 1))
+    (* (^ z 2) (^ y 2) (scheme-number . -3) (^ x 0))
+    (* (^ z 2) (scheme-number . 3) (^ y 1))
+    (* (^ z 2) (^ a 4) (^ y 1))
+    (* (^ z 1) (scheme-number . 4) (^ x 1)))
+  '(x y z))
+
+; (polynomial x
+;            (2 (polynomial y (2 (polynomial z (2 ((* (scheme-number . 3))))))))
+;            (1 (polynomial y (0 (polynomial z (1 ((* (scheme-number . 4)))))) (2 (polynomial z (2 ((* (scheme-number . 9)) (* (make-rational 3 2) (^ a 2) (^ b 4)) (* (scheme-number . 8))))))))
+;            (0 (polynomial y (1 (polynomial z (2 ((* (^ a 4)) (* (scheme-number . 3)))))) (2 (polynomial z (2 ((* (scheme-number . -3))))))))
+;            )
 
 
