@@ -384,6 +384,9 @@ poly1
 
 
 
+; ex2.92
+;
+;
 ; My idea is firstly convert all nested poly into a generic form (``expanding'' like text says)
 ; Then recover into nested poly form but make nesting vars in consistent order
 ;
@@ -433,7 +436,7 @@ poly3 ; (3x^2 + 8x -3)y^2
 (define poly4
   (make-poly 'y
              (adjoin-term (make-term 1
-                                     (make-poly 'x 
+                                     (make-poly 'x
                                                 (adjoin-term (make-term 1 (make-scheme-number 4))
                                                              (adjoin-term (make-term 0 (make-scheme-number -2))
                                                                           (the-empty-termlist)))))
@@ -513,9 +516,23 @@ poly6 ; [(3x^2 + 8x - 3)y^2 + 3y]z^2 + 4xz
         (else (cons (car semi-term-list) (adjoin-semi-term-list the-order multiply-list (cdr semi-term-list))))))
 
 
+
+(define (normalize-innermost-coeff coeff)
+  ; Assume: no other var other than in var-order, which means only numbers remains in coeff
+  ; Assume: I didn't use coercion above so I only test with scheme-numbers
+  ; Assume: Original coeffs are single numbers
+  ;
+  (fold add
+        (make-scheme-number 0)
+        (map (lambda (multiply-list)
+               (if (null? (cdr multiply-list))
+                 (make-scheme-number 0)
+                 (cadr multiply-list)))
+             coeff)))
+
 (define (diminish expanded-expression var-order)
   (if (null? var-order)
-    expanded-expression ;; TODO normalize innermost coeff
+    (normalize-innermost-coeff expanded-expression)
     (let ((current-var (car var-order)))
       (let ((semi-term-list (fold (lambda (multiply-list semi-term-list)
                                     (let ((taken-out (take-out-this-var-from-multiply-list current-var multiply-list)))
@@ -524,24 +541,130 @@ poly6 ; [(3x^2 + 8x - 3)y^2 + 3y]z^2 + 4xz
                                   expanded-expression)))
         (make-poly current-var (map (lambda (semi-term)
                                       (make-term (car semi-term) (diminish (expanded-expression-of-semi-term semi-term) (cdr var-order))))
-                                    semi-term-list))))))
+                                    (sort semi-term-list (lambda (a b) (> (car a) (car b)))) ; Boom!, error, order of terms should be in desc order
+                                    ))))))
 
 
 (diminish
   '((* (^ z 2) (^ y 2) (scheme-number . 3) (^ x 2))
     (* (^ z 2) (^ y 2) (scheme-number . 8) (^ x 1))
-    (* (^ z 2) (^ y 2) (make-rational 3 2) (^ a 2) (^ b 4) (^ x 1))
+    (* (^ z 2) (^ y 2) (scheme-number . 13) (^ x 1))
     (* (^ z 2) (^ y 2) (scheme-number . 9) (^ x 1))
     (* (^ z 2) (^ y 2) (scheme-number . -3) (^ x 0))
     (* (^ z 2) (scheme-number . 3) (^ y 1))
-    (* (^ z 2) (^ a 4) (^ y 1))
+    (* (^ z 2) (^ y 1))
     (* (^ z 1) (scheme-number . 4) (^ x 1)))
   '(x y z))
 
+
 ; (polynomial x
-;            (2 (polynomial y (2 (polynomial z (2 ((* (scheme-number . 3))))))))
-;            (1 (polynomial y (0 (polynomial z (1 ((* (scheme-number . 4)))))) (2 (polynomial z (2 ((* (scheme-number . 9)) (* (make-rational 3 2) (^ a 2) (^ b 4)) (* (scheme-number . 8))))))))
-;            (0 (polynomial y (1 (polynomial z (2 ((* (^ a 4)) (* (scheme-number . 3)))))) (2 (polynomial z (2 ((* (scheme-number . -3))))))))
-;            )
+;             (2 (polynomial y (2 (polynomial z (2 ((* (scheme-number . 3))))))))
+;             (1 (polynomial y
+;                            (0 (polynomial z (1 ((* (scheme-number . 4))))))
+;                            (2 (polynomial z (2 ((* (scheme-number . 9)) (* (scheme-number . 13)) (* (scheme-number . 8))))))))
+;             (0 (polynomial y (1 (polynomial z (2 ((*) (* (scheme-number . 3)))))) (2 (polynomial z (2 ((* (scheme-number . -3)))))))))
+
+; (polynomial x
+;             (2 (polynomial y (2 (polynomial z (2 (scheme-number . 3))))))
+;             (1 (polynomial y (0 (polynomial z (1 (scheme-number . 4)))) (2 (polynomial z (2 (scheme-number . 30))))))
+;             (0 (polynomial y (1 (polynomial z (2 (scheme-number . 3)))) (2 (polynomial z (2 (scheme-number . -3)))))))
+
+
+; poly5 ; [(3x^2 + 8x - 3)y^2 + (4x - 2)y]z^2 + [(4x - 2)y]z
+
+
+; (expand poly5)
+;; ((* (^ z 2) (^ y 2) (scheme-number . 3) (^ x 2))
+;;  (* (^ z 2) (^ y 2) (scheme-number . 8) (^ x 1))
+;;  (* (^ z 2) (^ y 2) (scheme-number . -3) (^ x 0))
+;;  (* (^ z 2) (^ y 1) (scheme-number . 4) (^ x 1))
+;;  (* (^ z 2) (^ y 1) (scheme-number . -2) (^ x 0))
+;;  (* (^ z 1) (^ y 1) (scheme-number . 4) (^ x 1))
+;;  (* (^ z 1) (^ y 1) (scheme-number . -2) (^ x 0))
+;;  )
+
+
+; poly6 ; [(3x^2 + 8x - 3)y^2 + 3y]z^2 + 4xz
+
+; (expand poly6)
+;; ((* (^ z 2) (^ y 2) (scheme-number . 3) (^ x 2))
+;;  (* (^ z 2) (^ y 2) (scheme-number . 8) (^ x 1))
+;;  (* (^ z 2) (^ y 2) (scheme-number . -3) (^ x 0))
+;;  (* (^ z 2) (scheme-number . 3) (^ y 1))
+;;  (* (^ z 1) (scheme-number . 4) (^ x 1)))
+
+
+
+(define (poly7)
+  (define p-x-2 (make-poly 'y (adjoin-term (make-term 2 (make-poly 'z (adjoin-term (make-term 2 (make-scheme-number 3))
+                                                                                   (the-empty-termlist))))
+                                           (the-empty-termlist))))
+  (define p-x-1 (make-poly 'y (adjoin-term (make-term 2 (make-poly 'z (adjoin-term (make-term 2 (make-scheme-number 8))
+                                                                                   (the-empty-termlist))))
+                                           (adjoin-term (make-term 0 (make-poly 'z (adjoin-term (make-term 1 (make-scheme-number 4))
+                                                                                   (the-empty-termlist))))
+                                                        (the-empty-termlist)))))
+  (define p-x-0 (make-poly 'y (adjoin-term (make-term 2 (make-poly 'z (adjoin-term (make-term 2 (make-scheme-number -3))
+                                                                                   (the-empty-termlist))))
+                                           (adjoin-term (make-term 1 (make-poly 'z (adjoin-term (make-term 2 (make-scheme-number 3))
+                                                                                                (the-empty-termlist))))
+                                                        (the-empty-termlist)))))
+
+  (make-poly 'x (adjoin-term (make-term 2 p-x-2)
+                             (adjoin-term (make-term 1 p-x-1)
+                                          (adjoin-term (make-term 0 p-x-0)
+                                                       (the-empty-termlist)))))
+  )
+
+(expand (poly7))
+; (
+;  (* (^ x 2) (^ y 2) (scheme-number . 3) (^ z 2))
+;  (* (^ x 1) (^ y 2) (scheme-number . 8) (^ z 2))
+;  (* (^ x 1) (^ y 0) (scheme-number . 4) (^ z 1))
+;  (* (^ x 0) (^ y 2) (scheme-number . -3) (^ z 2))
+;  (* (^ x 0) (^ y 1) (scheme-number . 3) (^ z 2))
+;  )
+
+(diminish (expand poly6) '(x y z) )
+; (polynomial x
+;             (2 (polynomial y (2 (polynomial z (2 (scheme-number . 3))))))
+;             (1 (polynomial y (0 (polynomial z (1 (scheme-number . 4)))) (2 (polynomial z (2 (scheme-number . 8))))))
+;             (0 (polynomial y (1 (polynomial z (2 (scheme-number . 3)))) (2 (polynomial z (2 (scheme-number . -3))))))
+;             )
+
+(diminish (expand (poly7)) '(x y z) )
+; (polynomial x
+;             (2 (polynomial y (2 (polynomial z (2 (scheme-number . 3))))))
+;             (1 (polynomial y (0 (polynomial z (1 (scheme-number . 4)))) (2 (polynomial z (2 (scheme-number . 8))))))
+;             (0 (polynomial y (1 (polynomial z (2 (scheme-number . 3)))) (2 (polynomial z (2 (scheme-number . -3))))))
+;             )
+
+(add (diminish (expand poly6) '(x y z))
+     (diminish (expand (poly7)) '(x y z)))
+; (polynomial x
+;             (2 (polynomial y (2 (polynomial z (2 (scheme-number . 6))))))
+;             (1 (polynomial y (0 (polynomial z (1 (scheme-number . 8)))) (2 (polynomial z (2 (scheme-number . 16))))))
+;             (0 (polynomial y (1 (polynomial z (2 (scheme-number . 6)))) (2 (polynomial z (2 (scheme-number . -6))))))
+;             )
+
+
+(diminish (expand poly6) '(y z x) )
+;(polynomial y
+;            (2 (polynomial z (2 (polynomial x (2 (scheme-number . 3)) (1 (scheme-number . 8)) (0 (scheme-number . -3))))))
+;            (1 (polynomial z (2 (polynomial x (0 (scheme-number . 3))))))
+;            (0 (polynomial z (1 (polynomial x (1 (scheme-number . 4)))))))
+
+(diminish (expand (poly7)) '(y z x) )
+;(polynomial y
+;            (2 (polynomial z (2 (polynomial x (2 (scheme-number . 3)) (1 (scheme-number . 8)) (0 (scheme-number . -3))))))
+;            (1 (polynomial z (2 (polynomial x (0 (scheme-number . 3))))))
+;            (0 (polynomial z (1 (polynomial x (1 (scheme-number . 4)))))))
+
+(add (diminish (expand poly6) '(y z x) )
+     (diminish (expand (poly7)) '(y z x)))
+;(polynomial y
+;            (2 (polynomial z (2 (polynomial x (2 (scheme-number . 6)) (1 (scheme-number . 16)) (0 (scheme-number . -6))))))
+;            (1 (polynomial z (2 (polynomial x (0 (scheme-number . 6))))))
+;            (0 (polynomial z (1 (polynomial x (1 (scheme-number . 8)))))))
 
 
