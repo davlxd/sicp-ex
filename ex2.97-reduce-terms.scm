@@ -36,17 +36,22 @@
 ;; INSTALL-SCHEME-NUMBER from ex2.78
 (define identity (lambda (x) x))
 (define (install-scheme-number-package)
+  (define (reduce-integers n d)
+    (let ((g (gcd n d)))
+      (list (/ n g) (/ d g))))
   (put 'add '(scheme-number scheme-number) +)
   (put 'sub '(scheme-number scheme-number) -)
   (put 'negate '(scheme-number) -)
   (put 'mul '(scheme-number scheme-number) *)
   (put 'div '(scheme-number scheme-number) /)
   (put 'gcd '(scheme-number scheme-number) gcd)
+  (put 'reduce '(scheme-number scheme-number) reduce-integers)
   (put 'make 'scheme-number identity)
   'done)
 (install-scheme-number-package)
 (define (make-scheme-number n) ((get 'make 'scheme-number) n))
 ;;
+
 
 ;; INSTALL RATIONAL
 (define (numer x) (car x))
@@ -294,41 +299,45 @@
                     (cadr rest-of-result))
               ))))))
 
-  (define (remainder-terms a b)
-    (newline)
-    (write-line "************** params for div-terms")
-    (write-line (list a b))
-    (write-line (div-terms a b))
-    (cadr (div-terms a b)))
-
-  (define (pseudoremainder-terms a b)
-    (let ((integerizing-factor (expt (coeff (car b)) (+ 1 (order (car a)) (- (order (car b))))))) ;; Rectify: should use (fist-term)
+  (define (integerizing-div-terms a b)
+    (let ((integerizing-factor (expt (coeff (car b)) (+ 1 (order (car a)) (- (order (car b)))))))
       (let ((integerizing-dividend-terms (map (lambda (term) (make-term (order term) (mul integerizing-factor (coeff term)))) a)))
-        (newline)
-        (write-line "************** params for revised div-terms")
-        (write-line (list a b))
-        (write-line integerizing-factor)
-        (write-line integerizing-dividend-terms)
-        (cadr (div-terms integerizing-dividend-terms b)))))
+        (div-terms integerizing-dividend-terms b))))
 
+  (define (pseudoremainder-terms a b) (cadr (integerizing-div-terms a b)))
+  (define (pseudoquotient-terms a b) (car (integerizing-div-terms a b)))
 
   (define (gcd-terms a b)
     (if (empty-termlist? b)
       a
-      ((lambda ()
-         (gcd-terms b (pseudoremainder-terms a b))
-         ))))
+      (gcd-terms b (pseudoremainder-terms a b))))
 
-  (define (gcd-coeff-for-gcd-terms a) ;; <------------ part b.
+  (define (reduce-terms-by-integer terms integer)
+    (map (lambda (term) (make-term (order term) (div (coeff term) integer))) terms))
+
+  (define (gcd-coeff-for-gcd-terms a)
     (let ((gcded-coeff (apply gcd (map coeff a))))
-      (map (lambda (term) (make-term (order term) (div (coeff term) gcded-coeff))) a)))  ;; Rectify: easier to use (div-terms  ... (make-term 0 ...)
+      (reduce-terms-by-integer a gcded-coeff)))
 
+
+  (define (reduce-terms n d)
+    (let ((gcded-terms (gcd-coeff-for-gcd-terms (gcd-terms n d))))
+      (let ((nn (pseudoquotient-terms n gcded-terms))
+            (dd (pseudoquotient-terms d gcded-terms)))
+        (let ((gcded-coeff (apply gcd (map coeff (append nn dd)))))
+          (list 
+            (reduce-terms-by-integer nn gcded-coeff)
+            (reduce-terms-by-integer dd gcded-coeff))))))
+
+  (define (reduce-poly p1 p2)
+    (if (same-variable? (variable p1) (variable p2))
+      (map (lambda (term) (make-poly (variable p1) term)) (reduce-terms (term-list p1) (term-list p2)))
+      (error "Polys not in same var -- REDUCE-POLY" (list p1 p2))))
 
   (define (gcd-poly p1 p2)
     (if (same-variable? (variable p1) (variable p2))
       (make-poly (variable p1)
-                 ; (gcd-terms (term-list p1) (term-list p2)))
-                 (gcd-coeff-for-gcd-terms (gcd-terms (term-list p1) (term-list p2)))) ;; <------------ part b.
+                 (gcd-coeff-for-gcd-terms (gcd-terms (term-list p1) (term-list p2))))
       (error "Polys not in same var -- GCD-POLY" (list p1 p2))))
 
 
@@ -364,6 +373,8 @@
   (put 'negate '(polynomial) (lambda (p) (tag (negate-poly p))))
   (put 'sub '(polynomial polynomial)
        (lambda (p1 p2) (tag (add-poly p1 (negate-poly p2)))))
+  (put 'reduce '(polynomial polynomial) ;<----------------------
+       (lambda (p1 p2) (map tag (reduce-poly p1 p2))))
   (put 'make 'polynomial
        (lambda (var terms) (tag (make-poly var terms))))
   (put '=zero? '(polynomial)
@@ -373,6 +384,7 @@
 (define (make-poly var terms) ((get 'make 'polynomial) var terms))
 
 (define (greatest-common-divisor x y) (apply-generic 'gcd x y))
+(define (reduce x y) (apply-generic 'reduce x y))
 
 
 
@@ -383,16 +395,92 @@
 (define p3 (make-polynomial 'x '((1 13) (0 5))))
 
 (define q1 (mul p1 p2))
+q1
+; (polynomial x (4 11) (3 -22) (2 18) (1 -14) (0 7))
+
 (define q2 (mul p1 p3))
+q2
+; (polynomial x (3 13) (2 -21) (1 3) (0 5))
 
 (greatest-common-divisor q1 q2)
-;
-; Was
-; (polynomial x (2 1458/169) (1 -2916/169) (0 1458/169))
-;
-; Now
-; (polynomial x (2 1458) (1 -2916) (0 1458))
-;
-; after b.
-; (polynomial x (2 1) (1 -2) (0 1)) 
+; (polynomial x (2 1) (1 -2) (0 1))
+
+(div q1 (greatest-common-divisor q1 q2))
+; (polynomial x ((2 11) (0 7)) ())
+
+(div q2 (greatest-common-divisor q1 q2))
+; (polynomial x ((1 13) (0 5)) ())
+
+(reduce q1 q2)
+; ((polynomial x (2 11) (0 7)) (polynomial x (1 13) (0 5)))
+
+
+
+
+
+(reduce 10 14)
+
+;; REVISED RATIONAL
+(define (numer x) (car x))
+(define (denom x) (cdr x))
+
+(define (install-rational-package)
+  ;; internal procedures
+  (define (make-rat n d)
+    (let ((reduced (reduce n d)))
+      (cons (car reduced) (cadr reduced))))
+  (define (add-rat x y)
+    (make-rat (add (mul (numer x) (denom y))
+                   (mul (numer y) (denom x)))
+              (mul (denom x) (denom y))))
+  (define (sub-rat x y)
+    (make-rat (sub (mul (numer x) (denom y))
+                   (mul (numer y) (denom x)))
+              (mul (denom x) (denom y))))
+  (define (mul-rat x y)
+    (make-rat (mul (numer x) (numer y))
+              (mul (denom x) (denom y))))
+  (define (div-rat x y)
+    (make-rat (mul (numer x) (denom y))
+              (mul (denom x) (numer y))))
+  ;; interface to rest of the system
+  (define (tag x) (attach-tag 'rational x))
+  (put 'add '(rational rational)
+       (lambda (x y) (tag (add-rat x y))))
+  (put 'sub '(rational rational)
+       (lambda (x y) (tag (sub-rat x y))))
+  (put 'mul '(rational rational)
+       (lambda (x y) (tag (mul-rat x y))))
+  (put 'div '(rational rational)
+       (lambda (x y) (tag (div-rat x y))))
+  (put 'negate '(rational) (lambda (x) (tag (sub-rat (make-rat 0 1) x))))
+  (put 'make 'rational
+       (lambda (n d) (tag (make-rat n d))))
+  'done)
+(install-rational-package)
+(define (make-rational n d) ((get 'make 'rational) n d))
+
+
+
+(define p1 (make-poly 'x '((1 1)(0 1))))
+(define p2 (make-poly 'x '((3 1)(0 -1))))
+(define p3 (make-poly 'x '((1 1))))
+(define p4 (make-poly 'x '((2 1)(0 -1))))
+
+(define rf1 (make-rational p1 p2))
+rf1
+(define rf2 (make-rational p3 p4))
+rf2
+
+(define added (add rf1 rf2))
+added
+; (rational (polynomial x (3 -1) (1 1) (0 1)) polynomial x (4 -1) (3 -1) (1 1) (0 1))
+
+(numer (cdr added))
+; (polynomial x (3 -1) (1 1) (0 1))
+
+(denom (cdr added))
+; (polynomial x (4 -1) (3 -1) (1 1) (0 1))
+
+
 
