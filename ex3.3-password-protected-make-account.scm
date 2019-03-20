@@ -8,7 +8,7 @@
     (set! balance (+ balance amount))
     balance)
   (define (dispatch input-password m)
-    (cond ((not (eq? input-password password)) (error "Incorrect password")) ;; should be hashed
+    (cond ((not (eq? input-password password)) (lambda (_) (error "Incorrect password")))
           ((eq? m 'withdraw) withdraw)
           ((eq? m 'deposit) deposit)
           (else (error "Unknown request -- MAKE-ACCOUNT"

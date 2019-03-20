@@ -1,7 +1,7 @@
 (define (make-monitored f)
   (define count 0)
   (lambda (arg)
-    (if (eq? arg 'how-many-calls?)
+    (if (eq? arg 'how-many-calls?); oops missed reset
       count
       (begin
         (set! count (+ count 1))

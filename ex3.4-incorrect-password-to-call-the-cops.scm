@@ -23,7 +23,7 @@
               (else (error "Unknown request -- MAKE-ACCOUNT"
                            m))))
       (if (>= incorrect-password-count 7)
-        (call-the-cops)
+        (call-the-cops) ; <--- should return a lambda
         (begin
           (set! incorrect-password-count (+ incorrect-password-count 1))
           (error "Incorrect password")))))
