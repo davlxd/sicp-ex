@@ -53,7 +53,7 @@
 ;                      |                         |  |
 ;             ______________________             |  |
 ;                                                |  |
-;             E1: initial-amount: 100             o  o
+;             E1: initial-amount: 100            o  o
 ;             ______________________             |
 ;                                                |
 ;                                               params: initial-amount
