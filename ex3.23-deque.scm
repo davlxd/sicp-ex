@@ -70,6 +70,24 @@
 
 
 
+; Diagram:
+;
+;
+;  --------> O  O -----> O  X
+;            |^_____     |
+;            |      \_   |
+;            v        \  v
+;          O   O       O   O
+;          |   |           |
+;          v   v           v
+;          ()  a           b
+;
+;          *           *
+;          |           |
+;           \         /
+;            \       /
+;             prev ptr
+
 
 
 ; dlist element
