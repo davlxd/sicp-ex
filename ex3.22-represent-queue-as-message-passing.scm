@@ -77,7 +77,7 @@
             ((eq? m 'rear-ptr) rear-ptr)
             ((eq? m 'empty-queue?) (empty-queue?))
             ((eq? m 'front-queue) (front-queue))
-            ((eq? m 'insert-queue!) (lambda (item) (insert-queue! item)))
+            ((eq? m 'insert-queue!) (lambda (item) (insert-queue! item))) ;; This is actually plain insert-queue! ¯\_(o o)_/¯
             ((eq? m 'delete-item!) (delete-queue!))
             (else (error "Unkown request -- MAKE-QUEUE" m))))
     dispatch))
