@@ -170,3 +170,48 @@
 
 
 ; ripple-carry-adder
+
+(define (ripple-carry-adder A B)
+  (define (adder A B)
+    (cond ((and (null? A) (null? B)) (cons (make-wire) '())) ;; given make-wire default 0
+          ((or (null? A) (null? B)) (error "A and B length not equal" (list A B)))
+          (else (let ((c-out (make-wire))
+                      (sum (make-wire)))
+                  (let ((next-adder-result (adder (cdr A) (cdr B))))
+                    (full-adder (car A) (car B) (car next-adder-result) sum c-out)
+                    (cons c-out (cons sum (cdr next-adder-result))))))))
+  (adder A B))
+
+
+; Test
+
+(define (make-wire-1)
+  (let ((wire (make-wire)))
+    (set-signal! wire 1)
+    wire))
+
+(let ((A (list (make-wire-1) (make-wire-1)))
+      (B (list (make-wire) (make-wire-1))))
+  (let ((C-and-S (ripple-carry-adder A B)))
+    (map get-signal C-and-S)))
+
+
+(let ((A (list (make-wire-1) (make-wire-1)))
+      (B (list (make-wire-1) (make-wire-1))))
+  (let ((C-and-S (ripple-carry-adder A B)))
+    (map get-signal C-and-S)))
+
+(let ((A (list (make-wire-1) (make-wire) (make-wire) (make-wire-1) (make-wire) (make-wire-1) ))
+      (B (list (make-wire) (make-wire-1) (make-wire) (make-wire-1) (make-wire) (make-wire-1) )))
+  (let ((C-and-S (ripple-carry-adder A B)))
+    (map get-signal C-and-S)))
+
+
+
+
+; Delay is (n * delay-of-full-adder)
+; delay-of-full-adder is (2 * delay-of-half-adder + delay-of-or)
+; delay-of-half-adder is (delay-of-add + max(delay-of-or, delay-of-add + delay-of-inverter))
+; = 2n * (delay-of-add + max(delay-of-or, delay-of-add + delay-of-inverter)) + n * delay-of-or
+;
+
