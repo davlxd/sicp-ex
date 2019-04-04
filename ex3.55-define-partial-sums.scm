@@ -25,3 +25,10 @@
 
 (display-stream (partial-sums integers) 10)
 
+
+
+; huntzhan's sln on schemewiki is quite smart 
+; considering both (stream-car s) and (stream-cdr s) are appeared in above solutions
+(define (partial-sums s) 
+     (add-streams s (cons-stream 0 (partial-sums s)))) 
+

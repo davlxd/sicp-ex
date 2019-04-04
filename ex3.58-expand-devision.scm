@@ -6,6 +6,7 @@
 
 
 ; expand is the series digits for <num> divide <den> with 0 0 0 0 0 0 as remaining if it's rational
+; aka float-point representation
 
 (define ones (cons-stream 1 ones))
 
