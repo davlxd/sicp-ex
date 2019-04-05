@@ -44,8 +44,10 @@
 (define (div-series s1 s2)
   (if (= 0 (stream-car s2))
     (error "error")
-    (mul-series s1
-                (invert-unit-series (scale-stream s2 (/ 1 (stream-car s2)))))))
+    (scale-stream
+      (mul-series s1
+                  (invert-unit-series (scale-stream s2 (/ 1 (stream-car s2)))))
+      (/ 1 (stream-car s2)))))
 
 
 (define invert-of-cos (invert-unit-series cosine-series))
