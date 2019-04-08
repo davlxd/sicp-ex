@@ -34,6 +34,8 @@
       (iter b (stream-car s) (stream-cdr s))))
   (iter (stream-car s) (stream-car (stream-cdr s)) (stream-cdr (stream-cdr s))))
 
+; stream-ref 0 and stream-ref 1 can be neater
+
 (sqrt 2 1.0)
 (sqrt 2 0.1)
 (sqrt 2 0.000001)
