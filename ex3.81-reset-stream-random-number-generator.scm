@@ -38,6 +38,8 @@
                                'generate
                                (cons-stream
                                  'generate '()))))))
+; make life easier
+(define request-stream (list->stream '(generate generate reset generate generate)))
 
 ;(display-stream request-stream 10)
 (display-stream (random-number-stream request-stream) 10)
