@@ -196,7 +196,19 @@
     (append
       (list (make-lambda (map car binding-list) body))
       (map cadr binding-list))))
+;
+;       ^
+;       | Stupid!, it a simple cons
 
+(define (let->combination exp)
+  (let ((binding-list (cadr exp))
+        (body (cddr exp)))
+    (cons
+      (make-lambda (map car binding-list) body)
+      (map cadr binding-list))))
+
+
+;
 (define (install-let)
   (put 'eval 'let (lambda (exp env) (eval (let->combination exp) env)))
   'done)
