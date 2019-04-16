@@ -183,8 +183,8 @@
 (define procedure-parameters cadr)
 (define procedure-body caddr)
 (define (extend-environment vars vals base-env) ; sequeeze into same table for simplicity
-  (for-each (lambda (var val) (put 'env var val)) vars vals))
-
+  (for-each (lambda (var val) (put 'env var val)) vars vals)
+  '())
 
 (eval '(cond ((= 3 2) 4)
              ((= 3 3) ((lambda (x) (square x)) 10))) '())
