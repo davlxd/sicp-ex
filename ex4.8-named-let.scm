@@ -215,6 +215,8 @@
             (cons var binding-vals))
       (cons the-lambda binding-vals))))
 
+; Rectification: like ex4.9, the name needs to be hided in a new env frame
+
 
 (let->combination '(let ((x (square 2))
                          (y (+ 3 4)))
