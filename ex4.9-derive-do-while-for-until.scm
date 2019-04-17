@@ -192,7 +192,7 @@
 
 
 
-; Do: (do (<body>) while <exp>)
+; Do: (do (<body>) until <exp>)
 
 
 ; For: (for (initialization-exp termination-exp increment-exp) <body>)
@@ -201,7 +201,6 @@
 ; While: (while <exp> <body>)
 
 
-; Until: (until <exp> <body>)
 
 
 
@@ -271,13 +270,182 @@
             (write-line (square i))
             (set! i (+ i 1))
             )
-           while
+           until
            (< i 4))
          (write-line i)
          )
       '())
 
 
+
+
+
+; For For
+; For: (for (initialization-exp termination-exp increment-exp) <body>)
+; Well traditionally the 3 exp after are optional, so we need wrap them up
+;
+; (for ((initialization-exp) (termination-exp) (increment-exp)) <body>)
+;
+; (for (
+;        ((define i 0))
+;        ((< i 4))
+;        ((set! i (+ i 1)))
+;      )
+;      (square i)
+;      (write-line i)
+; )
+; 
+;
+; => 
+;  ((lambda ()
+;    (define i 0)
+;    (define iter
+;            (lambda ()
+;                    (if (< i 4)
+;                        (begin
+;                          (square i)
+;                          (write-line i)
+;                          (set! i (+ i 1))
+;                          (iter)
+;                         )
+;                     )
+;            )
+;    )
+;    (iter)
+;  ))
+
+(define (derive-for exp)
+  (let ((termination-presented? (not (null? (cadr (cadr exp)))))
+        (initialization-exp-list (car (cadr exp)))
+        (termination-exp-list (cadr (cadr exp)))
+        (increment-exp-list (caddr (cadr exp)))
+        (body (cddr exp)))
+    (let ((new-body (cons 'begin
+                          (append body
+                                  (append increment-exp-list
+                                          (list (list 'iter)))))))
+      (if termination-presented?
+        (set! new-body (list 'if (car termination-exp-list) new-body)))
+
+      (list
+        (make-lambda '()
+                     (append initialization-exp-list
+                             (list
+                               (list 'define 'iter (make-lambda '() (list new-body)))
+                               (list 'iter))))))))
+(define (install-for)
+  (put 'eval 'for (lambda (exp env) (eval (derive-for exp) env)))
+  'done)
+(install-for)
+
+
+(eval '(for (
+             ((define i 0))
+             ((< i 4))
+             ((set! i (+ i 1)))
+             )
+            (square i)
+            (write-line i)
+            )
+      '())
+
+(eval '(begin
+         (for (
+               ((define i 0))
+               ((< i 4))
+               ((set! i (+ i 1)))
+               )
+              )
+         (write-line i)
+         )
+      '())
+
+(eval '(begin
+         (define i 0)
+         (for (
+               ()
+               ((< i 9))
+               ()
+               )
+              (set! i (+ i 1))
+              )
+         (write-line i)
+         )
+      '())
+
+;
+; While should be simliar to Do but with condition similiar to For
+; (while <exp> <body>)
+;
+; (while (< i 4)
+;   (write-line i)
+;   (set! i (+ i 1))
+; )
+;
+; => 
+;  ((lambda ()
+;    (define iter
+;            (lambda ()
+;                    (if (< i 4)
+;                      (begin
+;                        (write-line i)
+;                        (set! i (+ i 1))
+;                        (iter)
+;                      )
+;                    )
+;            )
+;    )
+;    (iter)
+;  ))
+
+
+(define (derive-while exp)
+  (let ((cond-exp (cadr exp))
+        (body-list (cddr exp)))
+    (list
+      (make-lambda '()
+                   (list
+                     (list 
+                       'define 
+                       'iter 
+                       (make-lambda '()
+                                    (list
+                                      (list 'if cond-exp
+                                            (cons 'begin
+                                                  (append body-list
+                                                          (list (list 'iter))))
+                                            (list 'quote 'done)
+                                            ))))
+                     (list 'iter)
+                     )))))
+
+(derive-while '(while (< i 4)
+                      (write-line i)
+                      (set! i (+ i 1))
+                      ))
+
+(define (install-while)
+  (put 'eval 'while (lambda (exp env) (eval (derive-while exp) env)))
+  'done)
+(install-while)
+
+(eval '(begin
+         (define i 0)
+         (while (< i 4)
+                (write-line i)
+                (set! i (+ i 1))
+                )
+         )
+      '())
+
+(eval '(begin
+         (define i 0)
+         (while (< i 4)
+                (set! i (+ i 1))
+                )
+         (write-line i)
+         )
+      '())
 
 
 
