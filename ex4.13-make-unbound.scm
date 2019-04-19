@@ -321,6 +321,8 @@ the-global-environment
             (else (scan (cdr vars) (cdr vals)))))
     (scan (frame-variables frame)
           (frame-values frame))))
+;
+; Rectification: should've combine above 2 procedures together and make it shorter
 
 (define (eval-undefinition exp env)
   (undefine-variable! (definition-variable exp) env)

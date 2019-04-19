@@ -291,6 +291,9 @@ the-global-environment
 ;
 ;
 
+; note, I use 2 level list to represent the frame (in order to modify frame inplace)
+; felix021 on schemewiki uses table style and assoc to scan, which is much smarter
+;
 (define (make-frame variables values) 
   (list (map cons variables values)))
 
