@@ -7,6 +7,12 @@
             ((null? key-list) (if (list? subtable) subtable (cdr subtable)))
             (else (lookup (assoc (car key-list) (cdr subtable)) (cdr key-list)))))
 
+    (define (del! subtable key-list)
+      (cond ((not subtable) #f)
+            ; ((= 1 (length key-list)) (del-assoc! (car key-list) (cdr subtable))) ;; inplace seems not remove 1st element?
+            ((= 1 (length key-list)) (set-cdr! subtable (del-assoc (car key-list) (cdr subtable))))
+            (else (del! (assoc (car key-list) (cdr subtable)) (cdr key-list)))))
+
     (define (insert! subtable key-list value)
       (if (null? key-list)
         (set-cdr! subtable value)
@@ -24,6 +30,7 @@
     (define (dispatch m)
       (cond ((eq? m 'lookup-proc) (lambda (key-list) (lookup local-table key-list)))
             ((eq? m 'insert-proc!) (lambda (key-list value) (insert! local-table key-list value)))
+            ((eq? m 'delete-proc!) (lambda (key-list) (del! local-table key-list)))
             ((eq? m 'data) data)
             (else (error "Unknown operation -- TABLE" m))))
     dispatch))
@@ -32,6 +39,7 @@
 (define operation-table (make-table))
 (define get (operation-table 'lookup-proc))
 (define put (operation-table 'insert-proc!))
+(define del (operation-table 'delete-proc!))
 
 (put '(alphanum alpha a) 97)
 (operation-table 'data)
@@ -83,4 +91,11 @@
 
 
 
+; del
+
+(operation-table 'data)
+(del '(alphanum))
+(operation-table 'data)
+(del '(hello))
+(operation-table 'data)
 
