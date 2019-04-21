@@ -1,3 +1,4 @@
+; As showed in ex4.19, if all sequential and "simultaneous" transformation is not added, Ben is right and it returns 16
 
 ; Some idea around text and this ex
 ;
