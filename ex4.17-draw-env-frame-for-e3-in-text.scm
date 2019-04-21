@@ -10,12 +10,26 @@
 ; _____________________________________________________________________________
 ;
 ; global env:
+;
+;      To eval
+;         ((lambda (x)
+;            (define u 2)
+;            (define v 3)
+;            (+ x u v)) 1)
+;
+;       eval (lambda (x) (define u 2) (define v 3) (+ x u v))
+;            into '(procedure <...>)
+;       eval 1
+;            into 1
+;
+;       apply ...
 ; _____________________________________________________________________________
 ;                       ^
 ;                       |
 ;                 ______|________ 
 ;             
 ;                  E1: x = 1
+;
 ;                      u = 2
 ;                      v = 3
 ;
@@ -32,16 +46,49 @@
      (set! u 2)
      (set! v 3)
      (+ x u v))) 1)
+; =>
+((lambda (x)
+   (
+    (lambda (u v)
+      (set! u 2)
+      (set! v 3)
+      (+ x u v))
+    '*unassigned* '*unassigned*
+    )
+   )
+ 1
+ )
+
 
 ; _____________________________________________________________________________
 ;
 ; global env:
+;
+;        To eval the <original exp>
+;
+;        eval (lambda (x) <...>)
+;             into '(procedure <...>)
+;
+;        eval 1
+;             into 1
+;
+;        apply ...
 ; _____________________________________________________________________________
 ;                       ^
 ;                       |
 ;                 ______|________ 
 ;             
 ;                  E1: x = 1
+;
+;                      eval (lambda (u v) <...>)
+;                           into '(procedure <...>)
+;
+;                      eval '*unassigned*
+;                           into '*unassigned*
+;                      eval '*unassigned*
+;                           into '*unassigned*
+;
+;                      apply ...
 ;                 _______________
 ;                       ^
 ;                       |
