@@ -6,8 +6,8 @@
   (lambda (n)
     (if (= n 1)
       1
-      (* n (- n 1)))))
-(factorial 3)
+      (* n (factorial (- n 1))))))
+(factorial 4)
 
 ; ====>
 
@@ -18,7 +18,7 @@
       (if (= k 1)
         1
         (* k (ft ft (- k 1)))))))
- 3)
+ 4)
 
 ; Manual emulation:
 ; => (lambda0 3)
