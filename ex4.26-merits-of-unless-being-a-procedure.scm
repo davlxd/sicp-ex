@@ -402,4 +402,11 @@
 
 
 
+; Rectification:
+; This binary pattern matching from XueqiaoXu is more sensible than my three-param-lambda-param-inspector
+(define select-y '(#t #f #t #t)) 
+(define xs '(1 3 5 7)) 
+(define ys '(2 4 6 8)) 
+(map if select-y xs ys)
+(map unless select-y xs ys)
 
