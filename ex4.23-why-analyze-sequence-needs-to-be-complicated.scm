@@ -57,3 +57,11 @@
 ;   (analyzed-exp2 env)
 ;   (analyzed-exp3 env))
 ;
+
+
+; Rectification: I merely focused on structure and totally missed the point
+; Alyssa's version produces a lambda whose body will not be evaled during analyze phase
+; And during execute phase, each time evaluator needs to loop over all analyzed procs, then execute
+; including condition check
+; While the text's version directly produces a nested lambda
+;
