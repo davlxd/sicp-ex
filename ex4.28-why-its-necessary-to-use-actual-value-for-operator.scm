@@ -109,8 +109,8 @@
 
 
 (define (eval exp env)
-  ; (newline)
-  ; (write-line (list "EVAL" exp))
+  (newline)
+  (write-line (list "EVAL" exp))
   (cond ((self-evaluating? exp) exp)
         ((variable? exp) (lookup-variable-value exp env))
         ((quoted? exp) (text-of-quotation exp))
@@ -124,9 +124,9 @@
         ((begin? exp) 
          (eval-sequence (begin-actions exp) env))
         ((cond? exp) (eval (cond->if exp) env))
-        ;         ((application? exp)                  
-        ;          (apply (eval (operator exp) env)
-        ;                 (list-of-values (operands exp) env)))    ; CHANGE 1
+        ; ((application? exp)                  
+        ;  (apply (eval (operator exp) env)
+        ;         (list-of-values (operands exp) env) env ))    ; CHANGE 1
         ((application? exp)
          (apply (actual-value (operator exp) env)
                 (operands exp)
@@ -329,44 +329,6 @@
 (define (thunk-exp thunk) (cadr thunk))
 
 (define (thunk-env thunk) (caddr thunk))
-;
-;
-;
-
-(actual-value
-  ; (eval
-  '(begin
-     (define (unless condition usual-value exceptional-value)
-       (if condition exceptional-value usual-value))
-
-     (define (factorial n)
-       (unless 
-         (= n 1)
-         (* n (factorial (- n 1)))
-         1))
-
-     (factorial 5)
-     )
-  the-global-environment)
-)
-
-
-
-; Recap of the text
-
-;
-; delay-it only happens for actual parameters when var-vals are bound to new frame for compound-procedure
-; 
-; force-it does the actual undelay, then invokes actual-value immediately
-;
-; And force-it gets invoked only by actual-value, which evals exp first then pass on to force-it
-;
-; actual-value happens when
-;   - eval if condition
-;   - eval compound-procedure operator
-;   - for primitive-procedure args
-;
-;
 
 (define (evaluated-thunk? obj)
   (tagged-list? obj 'evaluated-thunk))
@@ -385,71 +347,20 @@
          (thunk-value obj))
         (else obj)))
 
+;
+;
+;
 
+; example as follows, otherwise we'd have 
+; Unknown procedure type -- APPLY (thunk (procedure ... ... ...) (...))
 (actual-value
   ; (eval
   '(begin
-     (define (unless condition usual-value exceptional-value)
-       (if condition exceptional-value usual-value))
-
-     (define (factorial n)
-       (unless 
-         (= n 1)
-         (* n (factorial (- n 1)))
-         1))
-
-     (factorial 5)
+     (define (square x) (* x x))
+     (define (dispatcher procedure single-param) (procedure single-param))
+     (dispatcher square 4)
      )
   the-global-environment)
 
 
-
-
-
-; Exercise:
-
-(define count 0)
-(define (id x)
-  (set! count (+ count 1))
-  x)
-
-
-(define w (id (id 10)))
-
-;;; L-Eval input:
-count
-
-;;; L-Eval value:
-<response>
-; eval of (define w (id (id 10))) evals (id (id 10))
-; (id 10) is delayed as x
-; set! count to 1
-; x as delayed (id 10) returns as w
-
-; so <response> is 1
-
-
-
-;;; L-Eval input:
-w
-
-;;; L-Eval value:
-<response>
-; w originally is delayed (id 10)
-; but will be forced by driver
-; eval (id 10)
-; 10 is delayed as x
-; set! count to 2
-; x as delayed 10 is returned
-; again eval delayed-10
-; returns 10
-
-; so <response> is 10
-
-;;; L-Eval input:
-count
-
-;;; L-Eval value:
-<response>
-; count is 2 as expained above
 
