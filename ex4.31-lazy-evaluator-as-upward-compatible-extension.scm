@@ -55,8 +55,9 @@
     'false))
 (define (make-if predicate consequent alternative)
   (list 'if predicate consequent alternative))
+
 (define (eval-if exp env)
-  (if (true? (eval (if-predicate exp) env))
+  (if (true? (actual-value (if-predicate exp) env))
     (eval (if-consequent exp) env)
     (eval (if-alternative exp) env)))
 
@@ -118,17 +119,27 @@
     object))
 
 
-(define (apply procedure arguments)
-  ; (newline)
-  ; (write-line (list "APPLY" (print-procedure procedure) arguments))
+(define (handle-arguments-based-on-parameters parameters arguments env)
+  (map (lambda (param arg)
+         (cond ((and (pair? param) (eq? 'lazy (cadr param))) (delay-it arg env))
+               ((and (pair? param) (eq? 'lazy-memo (cadr param))) (delay-it-memo arg env))
+               (else (eval arg env))))
+       parameters arguments))
+
+(define (normalize-parameters parameters)
+  (map (lambda (param) (if (pair? param) (car param) param)) parameters))
+
+(define (apply procedure arguments env)
+  (newline)
+  (write-line (list "APPLY" (print-procedure procedure) arguments))
   (cond ((primitive-procedure? procedure)
-         (apply-primitive-procedure procedure arguments))
+         (apply-primitive-procedure procedure (list-of-arg-values arguments env))) ;; CHANGE 0: actual-value implies eval so replace eval with actual-value in here should be compatible always
         ((compound-procedure? procedure)
          (eval-sequence
            (procedure-body procedure)
            (extend-environment
-             (procedure-parameters procedure)
-             arguments
+             (normalize-parameters (procedure-parameters procedure)) ;; CHANGE 1: convert (a lazy-memo), (b lazy), c all to a, b and c
+             (handle-arguments-based-on-parameters (procedure-parameters procedure) arguments env) ;; CHANGE 2: 'thunk, 'thunk-memo, or eval based on formal argument
              (procedure-environment procedure))))
         (else
           (error
@@ -166,8 +177,10 @@
   (cond ((self-evaluating? exp) exp)
         ((variable? exp) (lookup-variable-value exp env))
         ((get 'eval (operator exp)) ((get 'eval (operator exp)) exp env))
-        ((pair? exp) (apply (eval (operator exp) env)
-                            (list-of-values (operands exp) env)))
+        ((application? exp)
+         (apply (actual-value (operator exp) env) ;; CHANGE 4: same reason as CHANGE 0
+                (operands exp) ;; CHANGE 5: because of CHANGE 1 and 2, pass in operands directly
+                env))
         (else
           (error "Unknown expression type -- EVAL" exp))))
 
@@ -275,6 +288,7 @@
     (define-variable! 'false false initial-env)
     (define-variable! '*unassigned* '*unassigned* initial-env)
     initial-env))
+
 (define the-global-environment (setup-environment))
 
 (define (primitive-procedure? proc)
@@ -298,10 +312,81 @@
 
 
 
+
+;
+; lazy library
+;
+
+(define (actual-value exp env)
+  (newline)
+  (write-line (list "actual-value" exp))
+  (force-it (eval exp env)))
+
+
+(define (list-of-arg-values exps env)
+  (if (no-operands? exps)
+    '()
+    (cons (actual-value (first-operand exps) env)
+          (list-of-arg-values (rest-operands exps)
+                              env))))
+(define (list-of-delayed-args exps env)
+  (if (no-operands? exps)
+    '()
+    (cons (delay-it (first-operand exps) env)
+          (list-of-delayed-args (rest-operands exps)
+                                env))))
+
+(define (delay-it exp env)
+  (list 'thunk exp env))
+
+(define (delay-it-memo exp env)
+  (list 'thunk-memo exp env))
+
+(define (thunk? obj)
+  (tagged-list? obj 'thunk))
+
+(define (thunk-memo? obj)
+  (tagged-list? obj 'thunk-memo))
+
+(define (thunk-exp thunk) (cadr thunk))
+
+(define (thunk-env thunk) (caddr thunk))
+
+(define (evaluated-thunk? obj)
+  (tagged-list? obj 'evaluated-thunk))
+
+(define (thunk-value evaluated-thunk) (cadr evaluated-thunk))
+
+(define (force-it obj)
+  (cond ;; CHANGE 6: If it's normal lazy, then force it normally without memoization, otherwise with memoization
+    ((thunk? obj) (actual-value (thunk-exp obj) (thunk-env obj)))
+    ((thunk-memo? obj)
+     (let ((result (actual-value
+                     (thunk-exp obj)
+                     (thunk-env obj))))
+       (newline)
+       (write-line (list "FORM THUNK Memoization from" (list-head obj 2)))
+       (set-car! obj 'evaluated-thunk)
+       (set-car! (cdr obj) result)
+       (set-cdr! (cdr obj) '())
+       (write-line (list "GET" obj))
+       result))
+    ((evaluated-thunk? obj)
+     (begin
+       (write-line (list "HIT" obj))
+       (thunk-value obj)
+       )
+     )
+    (else obj)))
+;
+;
+;
+
+
+
 (eval '(let ((n 3))
-         (* n 4))
+         (define (mul (a lazy) (b lazy-memo) c) (* a a b b c c))
+         (mul n n 2))
       the-global-environment)
-
-
 
 
