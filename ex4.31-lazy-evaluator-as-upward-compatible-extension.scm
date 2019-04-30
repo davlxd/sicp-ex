@@ -121,8 +121,8 @@
 
 (define (handle-arguments-based-on-parameters parameters arguments env)
   (map (lambda (param arg)
-         (cond ((and (pair? param) (eq? 'lazy (cadr param))) (delay-it arg env))
-               ((and (pair? param) (eq? 'lazy-memo (cadr param))) (delay-it-memo arg env))
+         (cond ((tagged-list? param 'lazy) (delay-it arg env))
+               ((tagged-list? param 'lazy-memo) (delay-it-memo arg env))
                (else (eval arg env))))
        parameters arguments))
 
