@@ -462,3 +462,16 @@
   the-global-environment)
 
 
+
+;c. Cy's proposal won't affect for-each example because actual-value implies eval,
+;   and the following force-it will return the same value for non-delayed object
+
+
+
+
+;d.
+;
+; I personally believe the eval-sequence in the text is sufficient, because within
+; my limited experience with Lisp, it seems uncommon to pass in expressions as
+; actual parameters, most of time it's lambdas. For lambdas we don't have to worry 
+; because by evaluating lambdas, they will be forced as application operators
