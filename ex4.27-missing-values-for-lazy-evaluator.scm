@@ -138,7 +138,7 @@
 
 (define (apply procedure arguments env)    ; CHANGE 6
   ; (newline)
-  ; (write-line (list "apply" procedure))
+  ; (write-line (list "apply" arguments))
   (cond ((primitive-procedure? procedure)
          ; (apply-primitive-procedure procedure arguments))
          (apply-primitive-procedure procedure (list-of-arg-values arguments env)))    ; CHANGE 2
@@ -420,7 +420,7 @@
 count
 
 ;;; L-Eval value:
-<response>
+; <response>
 ; eval of (define w (id (id 10))) evals (id (id 10))
 ; (id 10) is delayed as x
 ; set! count to 1
@@ -434,7 +434,7 @@ count
 w
 
 ;;; L-Eval value:
-<response>
+; <response>
 ; w originally is delayed (id 10)
 ; but will be forced by driver
 ; eval (id 10)
@@ -450,6 +450,27 @@ w
 count
 
 ;;; L-Eval value:
-<response>
+; <response>
 ; count is 2 as expained above
+
+
+
+
+; Verify
+
+(actual-value
+  ; (eval
+  '(begin
+     (define count 0)
+     (define (id x)
+       (set! count (+ count 1))
+       x)
+
+     (define w (id (id 10)))
+     (write-line count) ;; write-line as primitive-procedure will force its parameter
+     (write-line w)
+     count
+     )
+  the-global-environment)
+
 
