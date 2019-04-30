@@ -121,10 +121,10 @@
          (make-procedure (lambda-parameters exp)
                          (lambda-body exp)
                          env))
-        ((begin? exp) 
+        ((begin? exp)
          (eval-sequence (begin-actions exp) env))
         ((cond? exp) (eval (cond->if exp) env))
-        ; ((application? exp)                  
+        ; ((application? exp)
         ;  (apply (eval (operator exp) env)
         ;         (list-of-values (operands exp) env) env ))    ; CHANGE 1
         ((application? exp)
@@ -351,7 +351,7 @@
 ;
 ;
 
-; example as follows, otherwise we'd have 
+; example as following, otherwise we'd have
 ; Unknown procedure type -- APPLY (thunk (procedure ... ... ...) (...))
 (actual-value
   ; (eval
