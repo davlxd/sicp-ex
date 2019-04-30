@@ -367,19 +367,25 @@
   )
 ; On my machine 51093
 
-
 ; With memoization
 (define (force-it obj)
   (cond ((thunk? obj)
          (let ((result (actual-value
                          (thunk-exp obj)
                          (thunk-env obj))))
+           ; (newline)
+           ; (write-line (list "FORM THUNK Memoization from" (list-head obj 2)))
            (set-car! obj 'evaluated-thunk)
            (set-car! (cdr obj) result)
            (set-cdr! (cdr obj) '())
+           ; (write-line (list "GET" obj))
            result))
         ((evaluated-thunk? obj)
-         (thunk-value obj))
+         (begin
+           ; (write-line (list "HIT" obj))
+           (thunk-value obj)
+           )
+         )
         (else obj)))
 
 (execution-time
@@ -399,10 +405,84 @@
   )
 ; On my machine 4493
 
- (define count 0)
- (define (id x)
-     (set! count (+ count 1))
- 
+
+
+
+
+
+
+
+
+
+; Previously I thought Thunk Memoization won't play a major role on plain fib
+; because each (fib n) has its own frame and there's no way for consequent fib
+; to reuse previously calculated fib
+; However Memoization still speed up (fib 20) around 5 times!
+; How does this happen?
+;
+; I inspect memoization construct and utilization with a smaller fib index (fib 5)
+; It looks memoization only happens with parameter n
+;
+(define (force-it obj)
+  (if (thunk? obj)
+    (actual-value (thunk-exp obj) (thunk-env obj))
+    obj
+    ))
+
+; (fib 20) without memoization
+(execution-time
+  (lambda ()
+    (actual-value
+      '(begin
+         (define (fib n)
+           (cond ((= n 0) 0)
+                 ((= n 1) 1)
+                 (else (+ (fib (- n 2)) (fib (- n 1))))))
+         (fib 20)
+         )
+      the-global-environment)
+    )
+  )
+
+
+; (fib 20) with memoization
+(define (force-it obj)
+  (cond ((thunk? obj)
+         (let ((result (actual-value
+                         (thunk-exp obj)
+                         (thunk-env obj))))
+           (set-car! obj 'evaluated-thunk)
+           (set-car! (cdr obj) result)
+           (set-cdr! (cdr obj) '())
+           result))
+        ((evaluated-thunk? obj)
+         (thunk-value obj))
+        (else obj)))
+(execution-time
+  (lambda ()
+    (actual-value
+      '(begin
+         (define (fib n)
+           (cond ((= n 0) 0)
+                 ((= n 1) 1)
+                 (else (+ (fib (- n 2)) (fib (- n 1))))))
+         (fib 20)
+         )
+      the-global-environment)
+    )
+  )
+
+
+
+
+
+
+
+
+(define count 0)
+(define (id x)
+  (set! count (+ count 1)))
+
 ; part b.
 
 ; WITHOUT memoization
