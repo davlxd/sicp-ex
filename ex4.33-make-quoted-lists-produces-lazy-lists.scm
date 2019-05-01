@@ -416,6 +416,22 @@
      )
   (setup-environment))
 
+; nesting
+
+(actual-value
+  '(begin
+     (define (cons x y) (lambda (m) (m x y)))
+     (define (car z) (z (lambda (p q) p)))
+     (define (cdr z) (z (lambda (p q) q)))
+
+     (define y (list 1 2 (list 3.1 3.2 3.3) 4))
+     (write-line (car y))
+     (write-line (car (cdr y)))
+     (write-line (car (car (cdr (cdr y)))))
+     (write-line (car (cdr (car (cdr (cdr y))))))
+     (write-line (car (cdr (cdr (cdr y)))))
+     )
+  (setup-environment))
 
 
 ;
@@ -424,8 +440,11 @@
 ;
 (define (text-of-quotation exp env)
   (let ((content (cadr exp)))
-    (if (list? content) (eval (cons 'list content) env)
+    (if (list? content) (eval (cons 'list (map (lambda (element) (list 'quote element)) content) ) env)
       content)))
+
+; Correction: quote should propagate to inner elements
+
 
 (actual-value
   '(begin
@@ -439,7 +458,30 @@
      (write-line (car (cdr (cdr y))))
      (write-line (car (cdr (cdr (cdr y)))))
      (write-line (cdr (cdr (cdr (cdr y)))))
+
+
+     (define z (quote (a b c)))
+     (write-line (car z))
+
      (null? (quote ()))
+     )
+  (setup-environment))
+
+
+; nesting
+
+(actual-value
+  '(begin
+     (define (cons x y) (lambda (m) (m x y)))
+     (define (car z) (z (lambda (p q) p)))
+     (define (cdr z) (z (lambda (p q) q)))
+
+     (define y (quote (1 2 (3.1 3.2 3.3) 4)))
+     (write-line (car y))
+     (write-line (car (cdr y)))
+     (write-line (car (car (cdr (cdr y)))))
+     (write-line (car (cdr (car (cdr (cdr y))))))
+     (write-line (car (cdr (cdr (cdr y)))))
      )
   (setup-environment))
 
