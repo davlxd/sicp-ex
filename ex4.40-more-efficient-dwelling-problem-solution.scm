@@ -94,6 +94,18 @@
       (make-lambda (map car binding-list) body)
       (map cadr binding-list))))
 
+
+(define (or? exp) (tagged-list? exp 'or))
+(define (or->if exp)
+  (define (expand predicates)
+    (if (null? predicates)
+      'false
+      (make-if (car predicates)
+               'true
+               (expand (cdr predicates)))))
+  (expand (cdr exp)))
+
+    
 ;
 ;
 ;
@@ -392,6 +404,7 @@
         ((begin? exp) (analyze-sequence (begin-actions exp)))
         ((cond? exp) (analyze (cond->if exp)))
         ((let? exp) (analyze (let->lambda exp)))
+        ((or? exp) (analyze (or->if exp)))
         ((amb? exp) (analyze-amb exp))
         ((application? exp) (analyze-application exp))
         (else
@@ -502,7 +515,7 @@
 
 
 
-; more efficient version: ~ 300
+; more efficient version:
 
 (define (multiple-dwelling2)
   (let ((baker (amb 1 2 3 4))
@@ -520,10 +533,13 @@
           (list 'miller miller)
           (list 'smith smith))))
 
-(execution-time multiple-dwelling2)
+(execution-time multiple-dwelling2) ; ~ 300
 
 
-; more
+
+
+
+; Eliminate all requires
 
 (define (amb-of-list-except l predicate)
   (cond ((null? l) (amb))
@@ -564,7 +580,7 @@
                   (list 'smith smith))))))))
 
 
-(execution-time multiple-dwelling2)
+(execution-time multiple-dwelling2) ; ~ 30
 
 
 
