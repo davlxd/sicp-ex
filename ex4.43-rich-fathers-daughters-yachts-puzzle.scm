@@ -114,7 +114,7 @@
   (expand (cdr exp)))
 
 
-    
+
 ;
 ;
 ;
@@ -232,6 +232,8 @@
         (list 'not not)
         (list 'sqrt sqrt)
         (list 'even? even?)
+        (list 'memq memq)
+        (list 'eq? eq?)
         (list 'integer? integer?)
         (list 'member member)
         (list 'real-time-clock real-time-clock)
@@ -523,10 +525,139 @@
         (gabrielle-father (amb 'mr-moore 'colonel-downing 'mr-hall 'dr-parker))
         (marry-father (amb 'mr-moore)))
     (require (distinct? (list lorna-father melissa-father rosalind-father gabrielle-father marry-father)))
-    (list lorna-father  melissa-father rosalind-father gabrielle-father marry-father)
+    (list lorna-father melissa-father rosalind-father gabrielle-father marry-father)
     ))
 
 (game-of-yacht)
-        
+try-again
+
+
+; Sorry not singular answer
+
+
+; Solution 2
+; To express `Gabrielle's father owns the yacht that is named after Dr. Parker's daughter',
+; I introduce 2 procedures
+
+
+(define (game-of-father)
+  (define (all-fathers) (amb 'mr-moore 'colonel-downing 'mr-hall 'sir-barnacle-hood 'dr-parker)) ;; TODO need to revisit why all-fathers has to be a lambda here
+  (define (all-fathers-except father)
+    (let ((ret (all-fathers)))
+      (require (not (eq? ret father)))
+      ret))
+  (define (name-of-his-yacht father-name)
+    (cond ((eq? father-name 'mr-moore) 'lorna)
+          ((eq? father-name 'colonel-downing) 'melissa)
+          ((eq? father-name 'mr-hall) 'rosalind)
+          ((eq? father-name 'sir-barnacle-hood) 'gabrielle)
+          ((eq? father-name 'dr-parker) 'marry))) ;; a little jump here
+
+  (define lorna-father (all-fathers-except 'mr-moore))
+  (define melissa-father 'sir-barnacle-hood)
+  (define rosalind-father (all-fathers-except 'mr-hall))
+  (define gabrielle-father (all-fathers-except 'sir-barnacle-hood))
+  (define marry-father 'mr-moore)
+
+  (define (her-father she)
+    (cond ((eq? she 'lorna) lorna-father)
+          ((eq? she 'melissa) melissa-father)
+          ((eq? she 'rosalind) rosalind-father)
+          ((eq? she 'gabrielle) gabrielle-father)
+          ((eq? she 'marry) marry-father)))
+
+  (require (distinct? (list lorna-father melissa-father rosalind-father gabrielle-father marry-father)))
+  (require (eq? (her-father (name-of-his-yacht gabrielle-father)) 'dr-parker))
+  (list lorna-father melissa-father rosalind-father gabrielle-father marry-father)
+  )
+
+
+(game-of-father)
+try-again
+
+
+
+; Solution 3 
+; To inline requires to ambs
+;
+(define (game-of-daughter)
+  (define (all-fathers) (amb 'mr-moore 'colonel-downing 'mr-hall 'sir-barnacle-hood 'dr-parker))
+  (define (all-fathers-except fathers)
+    (let ((ret (all-fathers)))
+      (require (not (memq ret fathers)))
+      ret))
+  (define (name-of-his-yacht father-name)
+    (cond ((eq? father-name 'mr-moore) 'lorna)
+          ((eq? father-name 'colonel-downing) 'melissa)
+          ((eq? father-name 'mr-hall) 'rosalind)
+          ((eq? father-name 'sir-barnacle-hood) 'gabrielle)
+          ((eq? father-name 'dr-parker) 'marry))) ;; a little jump here
+
+  (define melissa-father 'sir-barnacle-hood)
+  (define marry-father 'mr-moore)
+  (define lorna-father (all-fathers-except (list 'mr-moore melissa-father marry-father)))
+  (define rosalind-father (all-fathers-except (list 'mr-hall lorna-father melissa-father marry-father)))
+  (define gabrielle-father (all-fathers-except (list 'sir-barnacle-hood marry-father lorna-father melissa-father rosalind-father)))
+
+  (define (her-father she)
+    (cond ((eq? she 'lorna) lorna-father)
+          ((eq? she 'melissa) melissa-father)
+          ((eq? she 'rosalind) rosalind-father)
+          ((eq? she 'gabrielle) gabrielle-father)
+          ((eq? she 'marry) marry-father)))
+
+  (require (eq? (her-father (name-of-his-yacht gabrielle-father)) 'dr-parker))
+  (list lorna-father melissa-father rosalind-father gabrielle-father marry-father)
+  )
+
+(game-of-daughter)
+try-again
+
+
+(execution-time game-of-father) ; ~ 15
+(execution-time game-of-daughter) ; ~ 5
+
+
+
+
+;if we are not told that Mary Ann's last name is Moore.
+
+(define (game-of-rich)
+  (define (all-fathers) (amb 'mr-moore 'colonel-downing 'mr-hall 'sir-barnacle-hood 'dr-parker))
+  (define (all-fathers-except father)
+    (let ((ret (all-fathers)))
+      (require (not (eq? ret father)))
+      ret))
+  (define (name-of-his-yacht father-name)
+    (cond ((eq? father-name 'mr-moore) 'lorna)
+          ((eq? father-name 'colonel-downing) 'melissa)
+          ((eq? father-name 'mr-hall) 'rosalind)
+          ((eq? father-name 'sir-barnacle-hood) 'gabrielle)
+          ((eq? father-name 'dr-parker) 'marry))) ;; a little jump here
+
+  (define lorna-father (all-fathers-except 'mr-moore))
+  (define melissa-father 'sir-barnacle-hood)
+  (define rosalind-father (all-fathers-except 'mr-hall))
+  (define gabrielle-father (all-fathers-except 'sir-barnacle-hood))
+  (define marry-father (all-fathers-except 'dr-parker))
+
+  (define (her-father she)
+    (cond ((eq? she 'lorna) lorna-father)
+          ((eq? she 'melissa) melissa-father)
+          ((eq? she 'rosalind) rosalind-father)
+          ((eq? she 'gabrielle) gabrielle-father)
+          ((eq? she 'marry) marry-father)))
+
+  (require (distinct? (list lorna-father melissa-father rosalind-father gabrielle-father marry-father)))
+  (require (eq? (her-father (name-of-his-yacht gabrielle-father)) 'dr-parker))
+  (list lorna-father melissa-father rosalind-father gabrielle-father marry-father)
+  )
+
+
+(game-of-rich)
+try-again
+try-again
+
+; 2 posibilities
 
 
