@@ -472,15 +472,6 @@
 
 
 
-; Exercise:
-; result no, efficiency yes
-; because some restrictions are easier to fail, we should be 
-; able to save some time by reordering them to top, so following
-; requires can be skipped
-;
-; And the easier to fail restrictions would be the ones that
-; kill the most possibilities
-
 (driver-loop)
 
 
